@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# This requires terminal input to work.
+if ! tty -s ; then
+    echo "$0 needs terminal input." >&2
+    exit 1
+fi
+
+# Make sure terminal returns to the current mode at exit.
+trap "stty `stty -g`" EXIT
+
+# Set terminal unbuffered, don't echo input.
+stty -icanon -echo
+
+# Tell Bash to use NUL as separator.
+IFS=$'\0'
+
+# Drain input buffer.
+while read -t 0 -n 0 ; do
+    read -n 1 KEY
+done
+
+PERCENT= $(echo "scale 0;$2*100" | bc)
+
+echo "Throttling process $1 by $PERCENT%"; 
+echo "Press any key to stop throttling.";
+
+WAKETIME= $(echo "1-$2" | bc)
+
+echo "$WAKETIME"
+
+
+# Work loop.
+while ! read -t 0 -n 0 ; do
+
+kill -SIGSTOP $1;
+sleep $2;
+kill -SIGCONT $1;
+sleep $WAKETIME;
+
+done
+
+# Drain input buffer to KEYS array.
+KEYS=()
+while read -t 0 -n 0 ; do
+	read -n 1 -r KEY;
+	KEYS=("${KEYS[@]}" "$KEY")
+done
+
