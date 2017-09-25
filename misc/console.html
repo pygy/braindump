@@ -1,0 +1,14 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>console test</title>
+<script>
+function writeln() {
+  document.write('<p>' + [].map.call(arguments, function(o){return '' + o}).join(', ') + '</p>')
+}
+try {
+  console.error('r')
+} catch ( e )
+  writeln(e)
+}
+writeln(typeof console)
+</script>
